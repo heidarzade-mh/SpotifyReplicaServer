@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpotifyReplicaServer.Models;
 
-namespace TodoApi.Data
+namespace SpotifyReplicaServer.Data
 {
-    public class TodoContext : DbContext
+    public class SpotifyReplicaServerDbContext : DbContext
     {
-        public TodoContext(DbContextOptions<TodoContext> options)
+        public SpotifyReplicaServerDbContext(DbContextOptions<SpotifyReplicaServerDbContext> options)
             : base(options)
         {
         }

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,7 +28,8 @@ namespace SpotifyReplicaServer
             });
             
 
-            services.AddDbContext<SpotifyReplicaServerDbContext>(option => option.UseSqlServer(Configuration.GetConnectionString("TodoContext")));
+            services.AddDbContext<SpotifyReplicaServerDbContext>(
+                option => option.UseSqlServer(Configuration.GetConnectionString("SpotifyReplicaServerDbContext")));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
