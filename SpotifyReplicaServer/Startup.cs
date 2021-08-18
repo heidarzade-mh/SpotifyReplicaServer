@@ -5,7 +5,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using SpotifyReplicaServer.Abstraction;
 using SpotifyReplicaServer.Data;
+using SpotifyReplicaServer.Helpers;
+using SpotifyReplicaServer.Models;
+using SpotifyReplicaServer.Shared.Services;
 
 namespace SpotifyReplicaServer
 {
@@ -20,16 +24,25 @@ namespace SpotifyReplicaServer
 
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddCors();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "SpotifyReplicaServer", Version = "v1" });
             });
-            
+
+            services.AddControllersWithViews()
+            .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
 
             services.AddDbContext<SpotifyReplicaServerDbContext>(
-                option => option.UseSqlServer(Configuration.GetConnectionString("SpotifyReplicaServerDbContext")));
+                option => option.UseSqlServer(Configuration.GetConnectionString("SpotifyReplicaServerDbContextConnection")));
+
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
+            services.AddScoped<IUserService, UserService>();
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -45,7 +58,12 @@ namespace SpotifyReplicaServer
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            app.UseCors(x => x
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+
+            app.UseMiddleware<JwtMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {
