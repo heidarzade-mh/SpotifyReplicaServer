@@ -11,5 +11,6 @@ namespace SpotifyReplicaServer.Data
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Song> Songs { get; set; }
     }
 }

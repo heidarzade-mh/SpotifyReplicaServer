@@ -25,7 +25,7 @@ namespace SpotifyReplicaServer.Controllers
             var response = userService.Login(model);
 
             if (response == null)
-                return BadRequest(new { message = "شناسه‌کاربری و یا رمز عبور اشتباه می‌باشد." });
+                return NotFound(new { message = "شناسه‌کاربری و یا رمز عبور اشتباه می‌باشد." });
 
             return Ok(new { token = response });
         }
