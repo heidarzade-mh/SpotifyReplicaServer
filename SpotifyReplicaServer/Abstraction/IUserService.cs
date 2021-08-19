@@ -13,5 +13,6 @@ namespace SpotifyReplicaServer.Abstraction
         Task<string> Register(User user);
         void SetUser(User user);
         User GetUser();
+        Task<bool> Alter(User user);
     }
 }

@@ -53,6 +53,29 @@ namespace SpotifyReplicaServer.Controllers
         }
 
         [Authorize]
+        [HttpPut("alter")]
+        public IActionResult Alter(UserDto userDto)
+        {
+            var user = new User
+            {
+                FirstName = userDto.FirstName,
+                LastName = userDto.LastName,
+                Password = userDto.Password,
+                Username = userDto.UserName,
+                Email = userDto.Email
+            };
+
+            var response = this.userService.Alter(user);
+            
+            if (!response.Result)
+            {
+                return BadRequest(new { message = "وارد کردن حداقل یک مشخصه الزامیست." });
+            }
+
+            return Ok(new { message= "اطلاعات با موفقیت ذخیره شد."});
+        }
+
+        [Authorize]
         [HttpGet("user")]
         public IActionResult GetUser()
         {

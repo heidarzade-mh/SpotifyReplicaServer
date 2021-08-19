@@ -22,7 +22,7 @@ namespace SpotifyReplicaServer.Shared.Services
 
         public UserService(IOptions<AppSettings> appSettings, SpotifyReplicaServerDbContext dbContext)
         {
-            this.appSettings = appSettings.Value ?? throw new ArgumentNullException(nameof(appSettings));;
+            this.appSettings = appSettings.Value ?? throw new ArgumentNullException(nameof(appSettings)); ;
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
@@ -50,6 +50,68 @@ namespace SpotifyReplicaServer.Shared.Services
             var token = generateJwtToken(user);
 
             return token;
+        }
+
+
+        public async Task<bool> Alter(User user)
+        {
+            var isChanged = false;
+            var userTmp = dbContext.Users.FirstOrDefault(x => x.Id == user.Id);
+
+            if (user.LastName != null)
+            {
+                isChanged = true;
+                userTmp.LastName = user.LastName;
+            }
+
+            if (user.FirstName != null)
+            {
+                isChanged = true;
+                userTmp.FirstName = user.FirstName;
+            }
+
+            if (user.Email != null)
+            {
+                isChanged = true;
+                userTmp.Email = user.Email;
+            }
+
+            if (user.Password != null)
+            {
+                isChanged = true;
+                userTmp.Password = user.Password;
+            }
+
+            if (user.Username != null)
+            {
+                isChanged = true;
+                userTmp.Username = user.Username;
+            }
+
+            if (user.Avatar != null)
+            {
+                isChanged = true;
+                userTmp.Avatar = user.Avatar;
+            }
+
+            if (user.Gender != null)
+            {
+                isChanged = true;
+                userTmp.Gender = user.Gender;
+            }
+
+            if (user.BirthDate != null)
+            {
+                isChanged = true;
+                userTmp.BirthDate = user.BirthDate;
+            }
+
+            if (isChanged)
+            {
+                await dbContext.SaveChangesAsync().ConfigureAwait(false);
+            }
+
+            return isChanged;
         }
 
         public IEnumerable<User> GetAll()
