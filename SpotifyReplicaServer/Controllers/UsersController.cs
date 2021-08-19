@@ -62,7 +62,10 @@ namespace SpotifyReplicaServer.Controllers
                 LastName = userDto.LastName,
                 Password = userDto.Password,
                 Username = userDto.UserName,
-                Email = userDto.Email
+                Email = userDto.Email,
+                Gender = userDto.Gender,
+                Avatar = userDto.Avatar,
+                BirthDate = userDto.BirthDate
             };
 
             var response = this.userService.Alter(user);
@@ -89,6 +92,9 @@ namespace SpotifyReplicaServer.Controllers
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Password = null,
+                Gender = user.Gender,
+                BirthDate = user.BirthDate,
+                Avatar = user.Avatar
             };
 
             return Ok(newUser);

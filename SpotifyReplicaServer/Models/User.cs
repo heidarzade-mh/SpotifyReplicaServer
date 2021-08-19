@@ -11,7 +11,7 @@ namespace SpotifyReplicaServer.Models
         public string Username { get; set; }
         public string Email { get; set; }
         public string Avatar { get; set; }
-        public bool Gender { get; set; }
+        public Gender Gender { get; set; }
         public string BirthDate { get; set; }
 
         [JsonIgnore]

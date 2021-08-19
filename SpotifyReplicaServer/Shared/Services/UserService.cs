@@ -22,7 +22,7 @@ namespace SpotifyReplicaServer.Shared.Services
 
         public UserService(IOptions<AppSettings> appSettings, SpotifyReplicaServerDbContext dbContext)
         {
-            this.appSettings = appSettings.Value ?? throw new ArgumentNullException(nameof(appSettings)); ;
+            this.appSettings = appSettings.Value ?? throw new ArgumentNullException(nameof(appSettings));
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
@@ -56,7 +56,7 @@ namespace SpotifyReplicaServer.Shared.Services
         public async Task<bool> Alter(User user)
         {
             var isChanged = false;
-            var userTmp = dbContext.Users.FirstOrDefault(x => x.Id == user.Id);
+            var userTmp = dbContext.Users.FirstOrDefault(x => x.Id == this.user.Id);
 
             if (user.LastName != null)
             {
@@ -94,7 +94,7 @@ namespace SpotifyReplicaServer.Shared.Services
                 userTmp.Avatar = user.Avatar;
             }
 
-            if (user.Gender != null)
+            if (user.Gender != 0)
             {
                 isChanged = true;
                 userTmp.Gender = user.Gender;
