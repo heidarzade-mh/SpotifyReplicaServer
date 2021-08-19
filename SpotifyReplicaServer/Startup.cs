@@ -42,6 +42,7 @@ namespace SpotifyReplicaServer
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             services.AddScoped<IUserService, UserService>();
+            services.AddSingleton<ISongsService, SongsService>();
 
         }
 
