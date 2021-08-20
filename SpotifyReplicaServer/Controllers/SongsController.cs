@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SpotifyReplicaServer.Abstraction;
 using SpotifyReplicaServer.Models;
 using SpotifyReplicaServer.Models.Request;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SpotifyReplicaServer.Controllers
 {
@@ -24,7 +24,8 @@ namespace SpotifyReplicaServer.Controllers
             return this.songsService.GetSongs();
         }
 
-        [HttpGet("{ id }")]
+        [HttpGet]
+        [Route("{id}")]
         public IActionResult GetSong(int id)
         {
             var song = this.songsService.GetSong(id);
@@ -37,9 +38,16 @@ namespace SpotifyReplicaServer.Controllers
         }
 
         [HttpPost("page")]
-        public List<Song> GetPagedSongs(PagingInformationRequest pagingInformation)
+        public IActionResult GetPagedSongs(PagingInformationRequest pagingInformation)
         {
-            return this.songsService.GetPagedSongs(pagingInformation);
+            var songs = this.songsService.GetPagedSongs(pagingInformation);
+
+            if (songs == null)
+            {
+                return BadRequest(new { message = "مقادیر وارد شده معتبر نمی‌باشد و یا نتیجه‌ای وجود ندارد." });
+            }
+
+            return Ok(songs);
         }
 
         [HttpPost("find")]
@@ -48,7 +56,7 @@ namespace SpotifyReplicaServer.Controllers
             return this.songsService.FindSongs(findingSongInformation);
         }
 
-        [HttpPost("add")]
+        /*[HttpPost("add")]
         public void AddSong(List<Song> songs)
         {
             songs.ForEach(son => son.Id = null);
@@ -56,6 +64,6 @@ namespace SpotifyReplicaServer.Controllers
             var response = this.songsService.AddSongs(songs);
 
             Console.WriteLine(response.Result);
-        }
+        }*/
     }
 }

@@ -19,6 +19,11 @@ namespace SpotifyReplicaServer.Data.Models
 
         public List<PlayListContext> PlayLists { get; set; }
 
+        public UserContext()
+        {
+            this.PlayLists = new List<PlayListContext>();
+        }
+
         public override bool Equals(object obj)
         {
             return obj is UserContext user &&

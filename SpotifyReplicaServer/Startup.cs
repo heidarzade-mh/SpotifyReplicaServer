@@ -43,7 +43,7 @@ namespace SpotifyReplicaServer
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISongsService, SongsService>();
-            services.AddScoped<IPlayListService, PlayerListService>();
+            services.AddScoped<IPlayListService, PlayListService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

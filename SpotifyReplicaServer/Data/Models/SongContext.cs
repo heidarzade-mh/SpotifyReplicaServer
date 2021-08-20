@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SpotifyReplicaServer.Data.Models
 {
@@ -13,5 +14,21 @@ namespace SpotifyReplicaServer.Data.Models
         public string PublishDate { get; set; }
 
         public List<PlayListContext> PlayLists { get; set; }
+
+        public SongContext()
+        {
+            this.PlayLists = new List<PlayListContext>();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is SongContext context &&
+                   Id == context.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id);
+        }
     }
 }

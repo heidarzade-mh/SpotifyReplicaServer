@@ -44,9 +44,21 @@ namespace SpotifyReplicaServer.Business.Services
             SortSongs(songs, pagingInformation.Sorter, pagingInformation.Desc);
 
             var start = (pagingInformation.Current - 1) * pagingInformation.Size;
-            var result = songs.GetRange(start, pagingInformation.Size);
+            var size = pagingInformation.Size;
+            try
+            {
+                if (start + size - 1 > songs.Count)
+                {
+                    return songs.GetRange(start, songs.Count - start);
+                }
 
-            return result;
+                var result = songs.GetRange(start, pagingInformation.Size);
+                return result;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public List<Song> FindSongs(FindingSongInformationRequest findingSongInformation)
@@ -62,6 +74,11 @@ namespace SpotifyReplicaServer.Business.Services
                 ).ToList();
 
             SortSongs(filteredSongs, findingSongInformation.Sorter, findingSongInformation.Desc);
+
+            if (findingSongInformation.count != 0 && findingSongInformation.count < filteredSongs.Count)
+            {
+                filteredSongs = filteredSongs.GetRange(0, findingSongInformation.count);
+            }
 
             return filteredSongs;
         }
