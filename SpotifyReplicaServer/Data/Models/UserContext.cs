@@ -1,8 +1,9 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
-namespace SpotifyReplicaServer.Models
+namespace SpotifyReplicaServer.Data.Models
 {
-    public class User
+    public class UserContext
     {
         public int Id { get; set; }
         public string FirstName { get; set; }
@@ -10,15 +11,17 @@ namespace SpotifyReplicaServer.Models
         public string Username { get; set; }
         public string Email { get; set; }
         public string Avatar { get; set; }
-        public Gender Gender { get; set; }
+        public GenderContext Gender { get; set; }
         public string BirthDate { get; set; }
 
         [JsonIgnore]
         public string Password { get; set; }
 
+        public List<PlayListContext> PlayLists { get; set; }
+
         public override bool Equals(object obj)
         {
-            return obj is User user &&
+            return obj is UserContext user &&
                    (Username == user.Username ||
                    Email == user.Email);
         }

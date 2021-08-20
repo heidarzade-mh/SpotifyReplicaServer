@@ -2,14 +2,13 @@
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SpotifyReplicaServer.Abstraction;
-using SpotifyReplicaServer.Models;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SpotifyReplicaServer.Helpers
+namespace SpotifyReplicaServer.Business
 {
     public class JwtMiddleware
     {

@@ -1,4 +1,4 @@
-﻿namespace SpotifyReplicaServer.Models
+﻿namespace SpotifyReplicaServer.Business
 {
     public class AppSettings
     {

@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Options;
+﻿using AutoMapper;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SpotifyReplicaServer.Abstraction;
 using SpotifyReplicaServer.Data;
+using SpotifyReplicaServer.Data.Models;
 using SpotifyReplicaServer.Models;
 using SpotifyReplicaServer.Models.Request;
 using System;
@@ -12,24 +14,26 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SpotifyReplicaServer.Shared.Services
+namespace SpotifyReplicaServer.Business.Services
 {
     public class UserService : IUserService
     {
         private readonly AppSettings appSettings;
-        private readonly SpotifyReplicaServerDbContext dbContext;
+        private readonly DatabaseContext dbContext;
+        private readonly IMapper mapper;
         private User user;
 
-        public UserService(IOptions<AppSettings> appSettings, SpotifyReplicaServerDbContext dbContext)
+        public UserService(IOptions<AppSettings> appSettings, DatabaseContext dbContext, IMapper mapper)
         {
             this.appSettings = appSettings.Value ?? throw new ArgumentNullException(nameof(appSettings));
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         public string Login(AuthenticateRequest model)
         {
-            var user = dbContext.Users.SingleOrDefault(x => x.Username == model.Username && x.Password == model.Password);
-
+            var userContext = dbContext.Users.SingleOrDefault(x => (x.Username == model.Username || x.Email == model.Username) && x.Password == model.Password);
+            var user = mapper.Map<User>(userContext);
             if (user == null) return null;
 
             var token = generateJwtToken(user);
@@ -39,12 +43,15 @@ namespace SpotifyReplicaServer.Shared.Services
 
         public async Task<string> Register(User user)
         {
-            if (dbContext.Users.ToList().Contains(user))
+            var usersContext = dbContext.Users.ToList();
+            var usersTemp = mapper.Map<List<User>>(usersContext);
+            if (usersTemp.Contains(user))
             {
                 return null;
             }
 
-            dbContext.Users.Add(user);
+            var userContextTemp = mapper.Map<UserContext>(user);
+            dbContext.Users.Add(userContextTemp);
             await dbContext.SaveChangesAsync().ConfigureAwait(false);
 
             var token = generateJwtToken(user);
@@ -53,70 +60,82 @@ namespace SpotifyReplicaServer.Shared.Services
         }
 
 
-        public async Task<bool> Alter(User user)
+        public async Task<string> Alter(User user)
         {
             var isChanged = false;
-            var userTmp = dbContext.Users.FirstOrDefault(x => x.Id == this.user.Id);
+            var userContextTmp = dbContext.Users.FirstOrDefault(x => x.Id == this.user.Id);
+            var usersContext = dbContext.Users.ToList();
+            var users = mapper.Map<List<User>>(usersContext);
+
+            if (users.Contains(user)) {
+                return "شناسه‌کاربری و یا ایمیل تکراری می‌باشد.";
+            }
 
             if (user.LastName != null)
             {
                 isChanged = true;
-                userTmp.LastName = user.LastName;
+                userContextTmp.LastName = user.LastName;
             }
 
             if (user.FirstName != null)
             {
                 isChanged = true;
-                userTmp.FirstName = user.FirstName;
+                userContextTmp.FirstName = user.FirstName;
             }
 
             if (user.Email != null)
             {
                 isChanged = true;
-                userTmp.Email = user.Email;
+                userContextTmp.Email = user.Email;
             }
 
             if (user.Password != null)
             {
                 isChanged = true;
-                userTmp.Password = user.Password;
+                userContextTmp.Password = user.Password;
             }
 
             if (user.Username != null)
             {
                 isChanged = true;
-                userTmp.Username = user.Username;
+                userContextTmp.Username = user.Username;
             }
 
             if (user.Avatar != null)
             {
                 isChanged = true;
-                userTmp.Avatar = user.Avatar;
+                userContextTmp.Avatar = user.Avatar;
             }
 
             if (user.Gender != 0)
             {
                 isChanged = true;
-                userTmp.Gender = user.Gender;
+                userContextTmp.Gender = (GenderContext)(int) user.Gender;
             }
 
             if (user.BirthDate != null)
             {
                 isChanged = true;
-                userTmp.BirthDate = user.BirthDate;
+                userContextTmp.BirthDate = user.BirthDate;
             }
 
             if (isChanged)
             {
                 await dbContext.SaveChangesAsync().ConfigureAwait(false);
+            } 
+            else
+            {
+                return "وارد کردن حداقل یک مشخصه الزامیست.";
             }
 
-            return isChanged;
+            return "";
         }
 
         public IEnumerable<User> GetAll()
         {
-            return dbContext.Users.AsEnumerable<User>();
+            var usersContext = dbContext.Users.AsEnumerable<UserContext>();
+            var users = mapper.Map<List<User>>(usersContext);
+            return users;
         }
 
         public User GetUser()
@@ -131,7 +150,8 @@ namespace SpotifyReplicaServer.Shared.Services
 
         public User GetById(int id)
         {
-            return dbContext.Users.FirstOrDefault(x => x.Id == id);
+            var userContext = dbContext.Users.FirstOrDefault(x => x.Id == id);
+            return mapper.Map<User>(userContext);
         }
 
         private string generateJwtToken(User user)

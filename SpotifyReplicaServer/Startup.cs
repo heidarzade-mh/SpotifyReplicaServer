@@ -6,10 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using SpotifyReplicaServer.Abstraction;
+using SpotifyReplicaServer.Business;
+using SpotifyReplicaServer.Business.Services;
 using SpotifyReplicaServer.Data;
-using SpotifyReplicaServer.Helpers;
-using SpotifyReplicaServer.Models;
-using SpotifyReplicaServer.Shared.Services;
 
 namespace SpotifyReplicaServer
 {
@@ -25,6 +24,7 @@ namespace SpotifyReplicaServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
+            services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -36,14 +36,14 @@ namespace SpotifyReplicaServer
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
 
-            services.AddDbContext<SpotifyReplicaServerDbContext>(
+            services.AddDbContext<DatabaseContext>(
                 option => option.UseSqlServer(Configuration.GetConnectionString("SpotifyReplicaServerDbContextConnection")));
 
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             services.AddScoped<IUserService, UserService>();
-            services.AddSingleton<ISongsService, SongsService>();
-
+            services.AddScoped<ISongsService, SongsService>();
+            services.AddScoped<IPlayListService, PlayerListService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -1,18 +1,24 @@
-﻿using SpotifyReplicaServer.Abstraction;
+﻿using AutoMapper;
+using SpotifyReplicaServer.Abstraction;
 using SpotifyReplicaServer.Data;
+using SpotifyReplicaServer.Data.Models;
 using SpotifyReplicaServer.Models;
 using SpotifyReplicaServer.Models.Request;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
-namespace SpotifyReplicaServer.Shared.Services
+namespace SpotifyReplicaServer.Business.Services
 {
     public class SongsService : ISongsService
     {
-        private readonly SpotifyReplicaServerDbContext dbContext;
-        public SongsService(SpotifyReplicaServerDbContext dbContext)
+        private readonly DatabaseContext dbContext;
+        private readonly IMapper mapper;
+
+        public SongsService(DatabaseContext dbContext, IMapper mapper)
         {
+            this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
@@ -20,18 +26,21 @@ namespace SpotifyReplicaServer.Shared.Services
         {
             var songs = dbContext.Songs.ToList();
             songs.Sort((x, y) => x.Name.CompareTo(y.Name));
-            return songs;
+            return mapper.Map<List<Song>>(songs);
         }
 
         public Song GetSong(int id)
         {
-            var song = dbContext.Songs.FirstOrDefault<Song>(x => x.Id == id);
-            return song;
+            var song = dbContext.Songs.FirstOrDefault(x => x.Id == id);
+
+            return mapper.Map<Song>(song);
         }
 
         public List<Song> GetPagedSongs(PagingInformationRequest pagingInformation)
         {
-            var songs = dbContext.Songs.ToList();
+            var songsContext = dbContext.Songs.ToList();
+            var songs = mapper.Map<List<Song>>(songsContext);
+
             SortSongs(songs, pagingInformation.Sorter, pagingInformation.Desc);
 
             var start = (pagingInformation.Current - 1) * pagingInformation.Size;
@@ -42,7 +51,8 @@ namespace SpotifyReplicaServer.Shared.Services
 
         public List<Song> FindSongs(FindingSongInformationRequest findingSongInformation)
         {
-            var songs = dbContext.Songs.ToList();
+            var songsContext = dbContext.Songs.ToList();
+            var songs = mapper.Map<List<Song>>(songsContext);
 
             var filteredSongs = songs.Where(
                 x =>
@@ -68,6 +78,16 @@ namespace SpotifyReplicaServer.Shared.Services
             {
                 songs.Reverse();
             }
+        }
+
+        public async Task<string> AddSongs(List<Song> songs)
+        {
+            var songsContext = this.mapper.Map<List<SongContext>>(songs);
+
+            this.dbContext.Songs.AddRange(songsContext);
+            await this.dbContext.SaveChangesAsync().ConfigureAwait(false);
+
+            return "salam";
         }
     }
 }

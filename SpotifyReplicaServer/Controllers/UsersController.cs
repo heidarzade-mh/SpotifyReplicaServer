@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using SpotifyReplicaServer.Abstraction;
 using SpotifyReplicaServer.Business.Athentication;
 using SpotifyReplicaServer.Models;
@@ -12,11 +13,13 @@ namespace SpotifyReplicaServer.Controllers
     [Route("users")]
     public class UsersController : ControllerBase
     {
-        private IUserService userService;
+        private readonly IUserService userService;
+       private readonly IMapper mapper;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IMapper mapper)
         {
             this.userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [HttpPost("login")]
@@ -31,16 +34,9 @@ namespace SpotifyReplicaServer.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register(UserDto userDto)
+        public IActionResult Register(UserViewModel userViewModel)
         {
-            var user = new User
-            {
-                FirstName = userDto.FirstName,
-                LastName = userDto.LastName,
-                Password = userDto.Password,
-                Username = userDto.UserName,
-                Email = userDto.Email
-            };
+            var user = mapper.Map<User>(userViewModel);
 
             var response = this.userService.Register(user);
 
@@ -54,28 +50,18 @@ namespace SpotifyReplicaServer.Controllers
 
         [Authorize]
         [HttpPut("alter")]
-        public IActionResult Alter(UserDto userDto)
+        public IActionResult Alter(UserViewModel userViewModel)
         {
-            var user = new User
-            {
-                FirstName = userDto.FirstName,
-                LastName = userDto.LastName,
-                Password = userDto.Password,
-                Username = userDto.UserName,
-                Email = userDto.Email,
-                Gender = userDto.Gender,
-                Avatar = userDto.Avatar,
-                BirthDate = userDto.BirthDate
-            };
+            var user = mapper.Map<User>(userViewModel);
 
             var response = this.userService.Alter(user);
-            
-            if (!response.Result)
+
+            if (!string.IsNullOrEmpty(response.Result))
             {
-                return BadRequest(new { message = "وارد کردن حداقل یک مشخصه الزامیست." });
+                return BadRequest(new { message = response.Result });
             }
 
-            return Ok(new { message= "اطلاعات با موفقیت ذخیره شد."});
+            return Ok(new { message = "اطلاعات با موفقیت ذخیره شد." });
         }
 
         [Authorize]
@@ -83,21 +69,9 @@ namespace SpotifyReplicaServer.Controllers
         public IActionResult GetUser()
         {
             var user = userService.GetUser();
+            user.Password = null;
 
-            var newUser = new User
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Password = null,
-                Gender = user.Gender,
-                BirthDate = user.BirthDate,
-                Avatar = user.Avatar
-            };
-
-            return Ok(newUser);
+            return Ok(user);
         }
     }
 }

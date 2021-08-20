@@ -4,6 +4,7 @@ using SpotifyReplicaServer.Models;
 using SpotifyReplicaServer.Models.Request;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SpotifyReplicaServer.Controllers
 {
@@ -45,6 +46,16 @@ namespace SpotifyReplicaServer.Controllers
         public List<Song> FindSongs(FindingSongInformationRequest findingSongInformation)
         {
             return this.songsService.FindSongs(findingSongInformation);
+        }
+
+        [HttpPost("add")]
+        public void AddSong(List<Song> songs)
+        {
+            songs.ForEach(son => son.Id = null);
+
+            var response = this.songsService.AddSongs(songs);
+
+            Console.WriteLine(response.Result);
         }
     }
 }

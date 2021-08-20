@@ -1,6 +1,7 @@
 ﻿using SpotifyReplicaServer.Models;
 using SpotifyReplicaServer.Models.Request;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SpotifyReplicaServer.Abstraction
 {
@@ -10,5 +11,6 @@ namespace SpotifyReplicaServer.Abstraction
         List<Song> GetPagedSongs(PagingInformationRequest pagingInformation);
         Song GetSong(int id);
         List<Song> GetSongs();
+        Task<string> AddSongs(List<Song> songs);
     }
 }
